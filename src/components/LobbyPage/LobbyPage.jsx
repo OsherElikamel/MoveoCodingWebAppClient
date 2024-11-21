@@ -12,8 +12,6 @@ import {
     Box,
 } from '@mui/material';
 import './LobbyPage.css';
-require('dotenv').config();
-
 
 const LobbyPage = () => {
     const [codeBlocks, setCodeBlocks] = useState([]);
