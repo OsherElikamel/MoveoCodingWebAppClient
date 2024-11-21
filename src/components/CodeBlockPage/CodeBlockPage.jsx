@@ -80,6 +80,15 @@ const CodeBlockPage = () => {
        
     }, [codeBlockId]);
 
+    useEffect(() => {
+        if (role === 'student') {
+            socketRef.current.on('mentor-left', () => {
+                alert('The mentor has left the session.');
+                navigate('/');
+            });
+        }
+    }, [role]);
+
     const fetchCodeBlocks = async () => {
         try {
             const response = await axios.get(`${API_URL}/api/codeblocks/${codeBlockId}`);
