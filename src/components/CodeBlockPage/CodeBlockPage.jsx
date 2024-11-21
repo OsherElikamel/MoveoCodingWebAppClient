@@ -60,7 +60,7 @@ const CodeBlockPage = () => {
 
         const fetchCodeBlock = async () => {
             try {
-                const response = await axios.get(`${API_URL}/api/codeblocks/${codeBlockId}`);
+                const response = await axios.get(${API_URL}/api/codeblocks/${codeBlockId});
                 setCodeBlock(response.data);
             } catch (error) {
                 console.error('Failed to fetch the code block:', error);
@@ -80,10 +80,9 @@ const CodeBlockPage = () => {
        
     }, [codeBlockId]);
 
-
     const fetchCodeBlocks = async () => {
         try {
-            const response = await axios.get(`${API_URL}/api/codeblocks/${codeBlockId}`);
+            const response = await axios.get(${API_URL}/api/codeblocks/${codeBlockId});
             setCodeBlock(response.data);
             setCode(response.data.initialCode);
         } catch (error) {
