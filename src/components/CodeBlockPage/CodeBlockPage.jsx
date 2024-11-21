@@ -29,10 +29,8 @@ const CodeBlockPage = () => {
 
     useEffect(() => {
         // Initialize the socket connection
-        if (!socketRef.current) {
-            socketRef.current = io(API_URL);
-        }
-        const socket = socketRef.current;
+         const socket = io(API_URL);
+         socketRef.current = socket;
 
         // Join the room
         socket.on('connect', () => {
@@ -40,8 +38,25 @@ const CodeBlockPage = () => {
         });
 
         socket.on('assign-role', (assignedRole) => {
-            setRole(assignedRole);
-        });
+        setRole(assignedRole);
+    });
+
+    socket.on('code-update', (updatedCode) => {
+        setCode(updatedCode);
+    });
+
+    socket.on('students-count', (count) => {
+        setStudentsCount(count);
+    });
+
+    // Redirect students if the mentor leaves the room
+    socket.on('mentor-left', () => {
+        if (role === 'student') {
+            alert('The mentor has left the session.');
+            navigate('/');
+        }
+    });
+
 
         const fetchCodeBlock = async () => {
             try {
@@ -56,32 +71,19 @@ const CodeBlockPage = () => {
 
         fetchCodeBlock();
 
-        socket.on('code-update', (updatedCode) => {
-            setCode(updatedCode);
-        });
-
-        socket.on('students-count', (count) => {
-            setStudentsCount(count);
-        });
-
-        // Redirect students if the mentor leave the room
-        socket.on('mentor-left', () => {
-            if (role === 'student') {
-                alert('The mentor has left the session.');
-                navigate('/');
-            }
-        });
-
         return () => {
-            socket.emit('leave-room', codeBlockId);
-            socket.disconnect();
-            socketRef.current = null;
-        };
+        socket.emit('leave-room', codeBlockId);
+        socket.disconnect();
+        socketRef.current = null;
+    };   
+
+       
     }, [codeBlockId]);
 
     const fetchCodeBlocks = async () => {
         try {
             const response = await axios.get(`${API_URL}/api/codeblocks/${codeBlockId}`);
+            setCodeBlock(response.data);
             setCode(response.data.initialCode);
         } catch (error) {
             console.error('Failed to fetch code blocks:', error);
@@ -90,7 +92,7 @@ const CodeBlockPage = () => {
 
     useEffect(() => {
         fetchCodeBlocks();
-    }, [codeBlockId]);
+    }, [codeBlockId, role, navigate]);
 
     const handleCodeChange = (editor, data, newCode) => {
         setCode(newCode);
@@ -144,7 +146,7 @@ const CodeBlockPage = () => {
                             mode: 'javascript',
                             theme: 'material',
                             lineNumbers: true,
-                            readOnly: role !== 'mentor',
+                            readOnly: role === 'mentor',
                         }}
                         onBeforeChange={(editor, data, value) => {
                             handleCodeChange(editor, data, value);
@@ -152,7 +154,7 @@ const CodeBlockPage = () => {
                     />
                 </Paper>
             )}
-            {role !== 'student' && (
+            {role === 'student' && (
                 <Button
                     variant="contained"
                     color="primary"
